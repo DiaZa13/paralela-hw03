@@ -24,15 +24,25 @@ static const int BLOCK_SIZE = 256;
          exit(1);                                                         \
        } }
 
+//__global__ void dynamic_add(int *a, const int *b, const int n){
+//    extern __shared__ int c[];
+//    int id = blockIdx.x * blockDim.x + threadIdx.x;
+//    int tid = threadIdx.x;
+//    if (id < n){
+//        c[tid] = a[id] + b[id];
+//        __syncthreads();
+//        a[id] = c[tid];
+//    }
+//}
 __global__ void dynamic_add(int *a, const int *b, const int n){
     extern __shared__ int c[];
     int id = blockIdx.x * blockDim.x + threadIdx.x;
+    int tid = threadIdx.x;
     if (id < n){
-        c[id] = a[id] + b[id];
+        c[tid] = a[id] + b[id];
         __syncthreads();
-        a[id] = c[id];
+        a[id] = c[tid];
     }
-}
 
 int main (void)
 {
@@ -76,7 +86,7 @@ int main (void)
 //  allowing to use the 64KB of shared memory
 //    cudaFuncSetAttribute(dynamic_add, cudaFuncAttributeMaxDynamicSharedMemorySize, 65536);
 //  call kernel
-    dynamic_add <<< grid, BLOCK_SIZE, sizeof (int) * vector_size>>> (da, db, vector_size);
+    dynamic_add <<< grid, BLOCK_SIZE, sizeof (int) * BLOCK_SIZE>>> (da, db, vector_size);
 //  synchronize
     CUDA_CHECK_RETURN (cudaDeviceSynchronize ());
 //  get end time

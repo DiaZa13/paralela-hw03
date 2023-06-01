@@ -15,7 +15,7 @@
 
 
 static const int BLOCK_SIZE = 256;
-static const int N = 12000;
+static const int N = 100000;
 
 #define CUDA_CHECK_RETURN(value) {           \
     cudaError_t _m_cudaStat = value;         \
@@ -25,15 +25,25 @@ static const int N = 12000;
          exit(1);                                                         \
        } }
 
+//__global__ void static_add(int *a, const int *b, const int n){
+//    __shared__ int c[N];
+//    int id = blockIdx.x * blockDim.x + threadIdx.x;
+//    if (id < n){
+//        c[id] = a[id] + b[id];
+//        __syncthreads();
+//        a[id] = c[id];
+//    }
+//}
+
 __global__ void static_add(int *a, const int *b, const int n){
-    __shared__ int c[N];
+    __shared__ int c[BLOCK_SIZE];
     int id = blockIdx.x * blockDim.x + threadIdx.x;
+    int tid = threadIdx.x;
     if (id < n){
-        c[id] = a[id] + b[id];
+        c[tid] = a[id] + b[id];
         __syncthreads();
-        a[id] = c[id];
+        a[id] = c[tid];
     }
-}
 
 int main (void)
 {

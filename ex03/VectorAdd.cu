@@ -15,7 +15,7 @@
 
 
 static const int BLOCK_SIZE = 256;
-static const int N = 12000;
+static const int N = 100000;
 
 #define CUDA_CHECK_RETURN(value) {           \
     cudaError_t _m_cudaStat = value;         \
